@@ -136,7 +136,4 @@ void Element::parse(string name, string value) {
         }
         catch (const std::invalid_argument&) {}
     }
-    else if (name == "transform") {
-        transform.parseTransform(value);
-    }
 }

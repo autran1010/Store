@@ -18,40 +18,26 @@ void rectangle::parseAttributes(xml_node<>* node) {
     }
 }
 void rectangle::Draw(Gdiplus::Graphics* graphics) {
-    Gdiplus::GraphicsState state = graphics->Save();
-
-    // 2. Áp dụng ma trận biến hình cục bộ (từ class Element)
-    graphics->MultiplyTransform(&this->transform.getMatrix());
-
-    // 3. TẠO MÀU (Thay thế dấu ... bằng code này)
-    // Chuyển đổi từ class 'color' của bạn sang 'Gdiplus::Color'
     Gdiplus::Color fillColor(
-        (BYTE)(this->fill.getOpacity() * 255),
+        (BYTE)(this->fill.getOpacity() * 255 ),
         (BYTE)(this->fill.getR() * 255),
         (BYTE)(this->fill.getG() * 255),
-        (BYTE)(this->fill.getB() * 255)
-    );
+        (BYTE)(this->fill.getB() * 255));
 
     Gdiplus::Color strokeColor(
         (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255),
-        (BYTE)(this->stroke.getStrokeColor().getR() * 255),
+        (BYTE)(this->stroke.getStrokeColor().getR() *255),
         (BYTE)(this->stroke.getStrokeColor().getG() * 255),
-        (BYTE)(this->stroke.getStrokeColor().getB() * 255)
-    );
+        (BYTE)(this->stroke.getStrokeColor().getB() * 255));
 
-    // 4. Tạo bút vẽ và cọ tô
+
     Gdiplus::SolidBrush brush(fillColor);
     Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
-    // 5. Vẽ hình (Sử dụng tọa độ gốc vì Matrix đã xử lý biến hình)
     if (this->fill.getOpacity() > 0) {
         graphics->FillRectangle(&brush, points.getX(), points.getY(), width, height);
     }
-
     if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
         graphics->DrawRectangle(&pen, points.getX(), points.getY(), width, height);
     }
-
-    // 6. Khôi phục trạng thái Graphics
-    graphics->Restore(state);
 }
