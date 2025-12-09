@@ -55,7 +55,11 @@ void Text::parseAttributes(xml_node<>* node) {
 void Text::Draw(Graphics* graphics) {
     if (content.empty()) return;
 
-  
+    // 1. Lưu trạng thái & Áp dụng Transform
+    Gdiplus::GraphicsState state = graphics->Save();
+    graphics->MultiplyTransform(&this->transform.getMatrix());
+
+    // --- Logic cũ của bạn ---
     std::wstring wFontFamily = font.empty() ? L"Times New Roman" : s2ws(font);
     FontFamily gdiFontFamily(wFontFamily.c_str());
 
@@ -68,41 +72,25 @@ void Text::Draw(Graphics* graphics) {
     if (lowerWeight.find("bold") != std::string::npos) style = (FontStyle)(style | FontStyleBold);
     if (lowerStyle.find("italic") != std::string::npos) style = (FontStyle)(style | FontStyleItalic);
 
-   
     float finalFontSize = (fontsize > 0.0f) ? fontsize : 12.0f;
     Font gdiFont(&gdiFontFamily, finalFontSize, style, UnitPixel);
 
-    
     REAL cellAscent = (REAL)gdiFontFamily.GetCellAscent(style);
-    REAL emHeight = (REAL)gdiFontFamily.GetEmHeight(style); 
+    REAL emHeight = (REAL)gdiFontFamily.GetEmHeight(style);
     REAL baselineOffset = finalFontSize * cellAscent / emHeight;
+    PointF origin(position.getX() + dx, position.getY() + dy - baselineOffset);
 
-    
-    PointF origin(position.getX() + dx, position.getY() + dy - baselineOffset); 
-
- 
     StringFormat format;
     format.SetLineAlignment(StringAlignmentNear);
-
     std::string lowerAnchor = textAnchor;
     std::transform(lowerAnchor.begin(), lowerAnchor.end(), lowerAnchor.begin(), ::tolower);
     if (lowerAnchor == "middle") format.SetAlignment(StringAlignmentCenter);
     else if (lowerAnchor == "end") format.SetAlignment(StringAlignmentFar);
     else format.SetAlignment(StringAlignmentNear);
 
-   
     std::wstring wcontent = s2ws(content);
-
     GraphicsPath path(FillModeWinding);
-    path.AddString(
-        wcontent.c_str(),
-        -1,
-        &gdiFontFamily,
-        style,
-        finalFontSize,
-        origin,
-        &format
-    );
+    path.AddString(wcontent.c_str(), -1, &gdiFontFamily, style, finalFontSize, origin, &format);
 
     if (stroke.getStrokeColor().getOpacity() > 0.0f && stroke.getStrokeWidth() > 0.0f) {
         Color strokeColor(
@@ -125,4 +113,7 @@ void Text::Draw(Graphics* graphics) {
         SolidBrush brush(fillColor);
         graphics->FillPath(&brush, &path);
     }
+
+    // 2. Khôi phục trạng thái
+    graphics->Restore(state);
 }

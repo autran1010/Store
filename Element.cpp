@@ -97,19 +97,34 @@ color Element::apply(string value) {
 void Element::parse(string name, string value) {
     if (name == "fill") {
         color newFill = apply(value);
-        if (newFill.getOpacity())
-        {
+
+        // --- SỬA LẠI ĐOẠN NÀY ---
+        // Logic cũ (SAI): newFill.setOpacity(fill.getOpacity()); 
+        // -> Vì fill mặc định opacity=0, nên lệnh này làm màu mới biến mất luôn.
+
+        // Logic mới (ĐÚNG): Chỉ giữ opacity cũ nếu nó đã được set (lớn hơn 0)
+        // Ví dụ: fill-opacity="0.5" khai báo trước, thì giữ 0.5.
+        // Còn nếu chưa khai báo gì (đang là 0), thì lấy opacity gốc của màu mới (thường là 1 - hiện rõ).
+        if (fill.getOpacity() > 0) {
             newFill.setOpacity(fill.getOpacity());
         }
+        // ------------------------
+
         fill = newFill;
     }
 
     else if (name == "stroke") {
         color newStrokeColor = apply(value);
-        newStrokeColor.setOpacity(stroke.getStrokeColor().getOpacity());
+
+        // --- SỬA LẠI ĐOẠN NÀY ---
+        // Tương tự như fill
+        if (stroke.getStrokeColor().getOpacity() > 0) {
+            newStrokeColor.setOpacity(stroke.getStrokeColor().getOpacity());
+        }
+        // ------------------------
+
         stroke.setStrokeColor(newStrokeColor);
     }
-
     else if (name == "stroke-width") {
         try {
             stroke.setStrokeWidth(stof(value));
@@ -136,4 +151,22 @@ void Element::parse(string name, string value) {
         }
         catch (const std::invalid_argument&) {}
     }
+    else if (name == "transform") {
+        transform.parseTransform(value);
+    }
+}
+const color& Element::getFill() const {
+    return fill;
+}
+
+void Element::setFill(const color& f) {
+    this->fill = f;
+}
+
+const Stroke& Element::getStroke() const {
+    return stroke;
+}
+
+void Element::setStroke(const Stroke& s) {
+    this->stroke = s;
 }

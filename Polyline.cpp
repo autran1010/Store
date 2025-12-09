@@ -21,6 +21,9 @@ void polyline::parseAttributes(xml_node<>* node) {
 void polyline::Draw(Gdiplus::Graphics* graphics) {
     if (points.size() < 2) return;
 
+    // 1. Lưu trạng thái & Áp dụng Transform
+    Gdiplus::GraphicsState state = graphics->Save();
+    graphics->MultiplyTransform(&this->transform.getMatrix());
 
     Gdiplus::Color fillColor(
         (BYTE)(this->fill.getOpacity() * 255.0f),
@@ -37,22 +40,19 @@ void polyline::Draw(Gdiplus::Graphics* graphics) {
     Gdiplus::SolidBrush brush(fillColor);
     Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
-   
     vector<Gdiplus::PointF> gdiPoints;
     gdiPoints.reserve(points.size());
     for (size_t i = 0; i < points.size(); ++i) {
         gdiPoints.emplace_back(points[i].getX(), points[i].getY());
     }
 
-    
-    Gdiplus::PointF* pData = gdiPoints.data();
-    INT numPoints = (INT)gdiPoints.size();
-
-    
     if (this->fill.getOpacity() > 0) {
-        graphics->FillPolygon(&brush, pData, numPoints, Gdiplus::FillModeWinding);
+        graphics->FillPolygon(&brush, gdiPoints.data(), (INT)gdiPoints.size(), Gdiplus::FillModeWinding);
     }
     if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawLines(&pen, pData, numPoints);
+        graphics->DrawLines(&pen, gdiPoints.data(), (INT)gdiPoints.size());
     }
+
+    // 2. Khôi phục trạng thái
+    graphics->Restore(state);
 }

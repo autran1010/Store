@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Polygon.h"
 void polygon::parseAttributes(xml_node<>* node) {
     for (xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -20,6 +20,10 @@ void polygon::parseAttributes(xml_node<>* node) {
 void polygon::Draw(Gdiplus::Graphics* graphics) {
     if (points.size() < 3) return;
 
+    // 1. Lưu trạng thái & Áp dụng Transform
+    Gdiplus::GraphicsState state = graphics->Save();
+    graphics->MultiplyTransform(&this->transform.getMatrix());
+
     Gdiplus::Color fillColor(
         (BYTE)(this->fill.getOpacity() * 255.0f),
         (BYTE)(this->fill.getR() * 255.0f),
@@ -31,19 +35,23 @@ void polygon::Draw(Gdiplus::Graphics* graphics) {
         (BYTE)(this->stroke.getStrokeColor().getR() * 255.0f),
         (BYTE)(this->stroke.getStrokeColor().getG() * 255.0f),
         (BYTE)(this->stroke.getStrokeColor().getB() * 255.0f));
-    
+
     Gdiplus::SolidBrush brush(fillColor);
     Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
-    Gdiplus::PointF* gdiPoints = new Gdiplus::PointF[points.size()];
+
+    // Convert points
+    vector<Gdiplus::PointF> gdiPoints(points.size());
     for (size_t i = 0; i < points.size(); ++i) {
         gdiPoints[i] = Gdiplus::PointF(points[i].getX(), points[i].getY());
     }
 
     if (this->fill.getOpacity() > 0) {
-        graphics->FillPolygon(&brush, gdiPoints, (INT)points.size());
+        graphics->FillPolygon(&brush, gdiPoints.data(), (INT)points.size());
     }
     if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawPolygon(&pen, gdiPoints, (INT)points.size());
+        graphics->DrawPolygon(&pen, gdiPoints.data(), (INT)points.size());
     }
-    delete[] gdiPoints;
+
+    // 2. Khôi phục trạng thái
+    graphics->Restore(state);
 }

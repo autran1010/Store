@@ -19,18 +19,33 @@ void Group::parseAttributes(xml_node<>* node) {
     }
 }
 
+// Group.cpp
 void Group::Draw(Gdiplus::Graphics* graphics) {
-    // 1. Lưu trạng thái
     Gdiplus::GraphicsState state = graphics->Save();
-
-    // 2. Áp dụng Transform của Group (nếu có)
     graphics->MultiplyTransform(&this->transform.getMatrix());
 
-    // 3. Bảo các con tự vẽ
     for (Element* child : children) {
+        // --- LOGIC KẾ THỪA MÀU SẮC ---
+
+        // 1. Xử lý FILL: Nếu con chưa có màu (opacity == 0) và Cha có màu -> Con lấy màu Cha
+        if (child->getFill().getOpacity() == 0 && this->fill.getOpacity() > 0) {
+            child->setFill(this->fill);
+        }
+
+        // 2. Xử lý STROKE: Tương tự
+        if (child->getStroke().getStrokeWidth() == 0 && this->stroke.getStrokeWidth() > 0) {
+            child->setStroke(this->stroke);
+        }
+
+        // Nếu stroke width cha có, nhưng con chưa có màu stroke -> lấy màu stroke của cha
+        if (child->getStroke().getStrokeColor().getOpacity() == 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
+            Stroke tempStroke = child->getStroke();
+            tempStroke.setStrokeColor(this->stroke.getStrokeColor());
+            child->setStroke(tempStroke);
+        }
+
         child->Draw(graphics);
     }
 
-    // 4. Khôi phục trạng thái
     graphics->Restore(state);
 }

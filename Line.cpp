@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Line.h"
 
 void Line::parseAttributes(xml_node<>* node) {
@@ -15,6 +15,9 @@ void Line::parseAttributes(xml_node<>* node) {
     }
 }
 void Line::Draw(Gdiplus::Graphics* graphics) {
+    // 1. Lưu trạng thái & Áp dụng Transform
+    Gdiplus::GraphicsState state = graphics->Save();
+    graphics->MultiplyTransform(&this->transform.getMatrix());
 
     Gdiplus::Color strokeColor(
         (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255.0f),
@@ -24,9 +27,10 @@ void Line::Draw(Gdiplus::Graphics* graphics) {
 
     Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
-
     if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
         graphics->DrawLine(&pen, point1.getX(), point1.getY(), point2.getX(), point2.getY());
     }
 
+    // 2. Khôi phục trạng thái
+    graphics->Restore(state);
 }
