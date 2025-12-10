@@ -1,4 +1,4 @@
-﻿#include "Color.h"
+#include "Color.h"
 #include "Stroke.h"
 #include "Transform.h"
 
@@ -12,8 +12,6 @@ protected:
 	color fill;
 	Transform transform;
 	color apply(string value);
-	bool isFillSet = false;   // <--- THÊM BIẾN NÀY
-	bool isStrokeSet = false; // <--- THÊM BIẾN NÀY
 public:
 	virtual ~Element() = default;
 	
@@ -27,16 +25,7 @@ public:
 	void setFill(const color& f);
 	const Stroke& getStroke() const;
 	void setStroke(const Stroke& s);
-	Element() {
-		// Constructor nhớ khởi tạo false
-		isFillSet = false;
-		isStrokeSet = false;
-	}
-	// ...
-
-	// Thêm getter nếu cần, hoặc để protected cho Group truy cập (nếu Group là friend hoặc kế thừa)
-	bool getIsFillSet() const { return isFillSet; }
-	bool getIsStrokeSet() const { return isStrokeSet; }
+	
 };
 
 #endif

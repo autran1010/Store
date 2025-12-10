@@ -7,7 +7,7 @@
 
 class Group : public Element {
 private:
-    std::vector<Element*> children; // Danh sách con
+    std::vector<Element*> children;
 
 public:
     Group();
@@ -16,7 +16,7 @@ public:
     void parseAttributes(xml_node<>* node) override;
     void Draw(Gdiplus::Graphics* graphics) override;
 
-    void addChild(Element* child); // Hàm thêm con
+    void addChild(Element* child); 
 };
 
 #endif

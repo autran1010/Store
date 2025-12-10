@@ -38,7 +38,6 @@ void Transform::parseTransform(const std::string& transformValue) {
     std::stringstream ss(transformValue);
     std::string token;
 
-    // SVG transform sử dụng cú pháp: command(arg1, arg2) command(arg3) ...
     // Chúng ta sẽ tách chuỗi dựa trên dấu ')'
     while (std::getline(ss, token, ')')) {
         if (token.empty() || token.find('(') == std::string::npos) continue;

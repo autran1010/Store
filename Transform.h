@@ -15,10 +15,8 @@ private:
 public:
     Transform();
 
-    // Hàm phân tích cú pháp chuỗi transform SVG (translate, rotate, scale)
     void parseTransform(const std::string& transformValue);
 
-    // Lấy ma trận hiện tại (const)
     const Gdiplus::Matrix& getMatrix() const { return matrix; }
 
     // Kết hợp ma trận khác vào ma trận hiện tại (cho Group lồng nhau)
