@@ -68,6 +68,16 @@ void Parser::loadFromFile(const string source) {
 
     xml_node<>* rootNode = doc.first_node("svg");
     if (!rootNode) return;
+    \
+    xml_attribute<>* attrViewBox = rootNode->first_attribute("viewBox");
+    if (attrViewBox) {
+        string vb = attrViewBox->value();
+        // Bạn cần parse chuỗi "x y w h" này và lưu vào một biến nào đó
+        // Để đơn giản, ta in ra hoặc gán tạm vào Renderer nếu có thể truy cập
+        // (Gợi ý: Cần thêm hàm setViewBox cho Parser hoặc Renderer)
+    }
+    xml_attribute<>* attrWidth = rootNode->first_attribute("width");
+    xml_attribute<>* attrHeight = rootNode->first_attribute("height");
 
     // Duyệt qua các node ở tầng ngoài cùng của SVG
     for (xml_node<>* node = rootNode->first_node(); node; node = node->next_sibling()) {

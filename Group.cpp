@@ -25,27 +25,19 @@ void Group::Draw(Gdiplus::Graphics* graphics) {
     graphics->MultiplyTransform(&this->transform.getMatrix());
 
     for (Element* child : children) {
-        // --- LOGIC KẾ THỪA MÀU SẮC ---
 
-        // 1. Xử lý FILL: Nếu con chưa có màu (opacity == 0) và Cha có màu -> Con lấy màu Cha
-        if (child->getFill().getOpacity() == 0 && this->fill.getOpacity() > 0) {
+        // LOGIC MỚI: Chỉ kế thừa nếu con CHƯA HỀ SET fill (isFillSet == false)
+        if (!child->getIsFillSet() && this->fill.getOpacity() > 0) {
             child->setFill(this->fill);
+            // Lưu ý: Không cần set isFillSet = true cho con, để nó không ảnh hưởng logic khác
         }
 
-        // 2. Xử lý STROKE: Tương tự
-        if (child->getStroke().getStrokeWidth() == 0 && this->stroke.getStrokeWidth() > 0) {
+        // Tương tự với Stroke
+        if (!child->getIsStrokeSet() && this->stroke.getStrokeWidth() > 0) {
             child->setStroke(this->stroke);
-        }
-
-        // Nếu stroke width cha có, nhưng con chưa có màu stroke -> lấy màu stroke của cha
-        if (child->getStroke().getStrokeColor().getOpacity() == 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-            Stroke tempStroke = child->getStroke();
-            tempStroke.setStrokeColor(this->stroke.getStrokeColor());
-            child->setStroke(tempStroke);
         }
 
         child->Draw(graphics);
     }
-
     graphics->Restore(state);
 }
