@@ -55,9 +55,11 @@ void Text::parseAttributes(xml_node<>* node) {
 void Text::Draw(Graphics* graphics) {
     if (content.empty()) return;
 
-    // 1. Lưu trạng thái & Áp dụng Transform
-    Gdiplus::GraphicsState state = graphics->Save();
-    graphics->MultiplyTransform(&this->transform.getMatrix());
+    // 1. Lưu trạng thái Graphics hiện tại
+    GraphicsState state = graphics->Save();
+
+    // 2. Lấy ma trận từ class Transform và áp dụng
+    graphics->MultiplyTransform(this->transform.getMatrix(), MatrixOrderPrepend);
 
     // --- Logic cũ của bạn ---
     std::wstring wFontFamily = font.empty() ? L"Times New Roman" : s2ws(font);

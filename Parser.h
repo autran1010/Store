@@ -1,36 +1,33 @@
-﻿#pragma once
-#ifndef PARSER_H_
-#define PARSER_H_
-
-#include "Element.h"
-#include "Rectangle.h"
+﻿#include "Element.h"
 #include "Circle.h"
+#include "Rectangle.h"
 #include "Ellipse.h"
 #include "Line.h"
 #include "Polyline.h"
 #include "Polygon.h"
 #include "Text.h"
-#include "Path.h"  // Yêu cầu 2
-#include "Group.h" // Yêu cầu 3
+// Thêm 2 header mới
+#include "Path.h"
+#include "Group.h" 
 
-#include <vector>
-#include <string>
+#ifndef PARSER_H_
+#define	PARSER_H_
 
 class Parser {
 private:
-    std::string source;
-    std::vector<Element*> children;
+	string source;
+	vector<Element*> children;
 
-    // [QUAN TRỌNG] Hàm đệ quy để parse group lồng nhau
-    Element* parseElement(xml_node<>* node);
+	// --- CẬP NHẬT DÒNG NÀY ---
+	// Thêm tham số mặc định parentStyle = nullptr
+	void parseRecursive(xml_node<>* node, vector<Element*>& container, Element* parentStyle = nullptr);
 
 public:
-    Parser();
-    ~Parser();
-
-    Element* createElement(const std::string& name);
-    void loadFromFile(const std::string source);
-    const std::vector<Element*>& getChildren();
+	Parser();
+	~Parser();
+	Element* createElement(const string&);
+	void loadFromFile(const string);
+	const vector<Element*>& getChildren();
 };
 
 #endif

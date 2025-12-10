@@ -3,7 +3,7 @@
 
 
 
-color::color() : r(0), g(0), b(0), opacity(0) {}
+color::color():r(0), g(0), b(0), opacity(1) {}
 
 color::color(float r, float g, float b, float o) : r(r), g(g), b(b), opacity(o) {}
 

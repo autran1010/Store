@@ -1,27 +1,28 @@
 ﻿#pragma once
-#include <Gdiplus.h>
+#ifndef TRANSFORM_H_
+#define TRANSFORM_H_
+
 #include <string>
+#include <gdiplus.h>
 #include <vector>
+#include <regex>
 #include <sstream>
-#include <algorithm>
-#include <cctype>
+
+using namespace std;
 
 class Transform {
 private:
-    Gdiplus::Matrix matrix;
-
-    std::vector<float> parseNumbers(const std::string& argsStr);
+    Gdiplus::Matrix matrix; // Ma trận biến đổi của GDI+
 
 public:
     Transform();
+    ~Transform() = default;
 
-    void parseTransform(const std::string& transformValue);
+    // Hàm phân tích chuỗi attribute transform="..."
+    void parse(string value);
 
-    const Gdiplus::Matrix& getMatrix() const { return matrix; }
-
-    // Kết hợp ma trận khác vào ma trận hiện tại (cho Group lồng nhau)
-    void concatenate(const Gdiplus::Matrix& other);
-
-    // Reset ma trận về ma trận đơn vị
-    void reset() { matrix.Reset(); }
+    // Trả về ma trận để Graphics sử dụng
+    Gdiplus::Matrix* getMatrix();
 };
+
+#endif

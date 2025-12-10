@@ -17,9 +17,11 @@ void Circle::parseAttributes(xml_node<>* node) {
     }
 }
 void Circle::Draw(Gdiplus::Graphics* graphics) {
-    // 1. Lưu trạng thái & Áp dụng Transform
-    Gdiplus::GraphicsState state = graphics->Save();
-    graphics->MultiplyTransform(&this->transform.getMatrix());
+    // 1. Lưu trạng thái Graphics hiện tại
+    GraphicsState state = graphics->Save();
+
+    // 2. Lấy ma trận từ class Transform và áp dụng
+    graphics->MultiplyTransform(this->transform.getMatrix(), MatrixOrderPrepend);
 
     Gdiplus::Color fillColor(
         (BYTE)(this->fill.getOpacity() * 255.0f),
@@ -47,6 +49,7 @@ void Circle::Draw(Gdiplus::Graphics* graphics) {
     if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
         graphics->DrawEllipse(&pen, x, y, w, h);
     }
+
 
     // 2. Khôi phục trạng thái
     graphics->Restore(state);

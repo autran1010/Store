@@ -94,79 +94,110 @@ color Element::apply(string value) {
     }
     return color(0, 0, 0, 0);
 }
+
 void Element::parse(string name, string value) {
     if (name == "fill") {
-        color newFill = apply(value);
-
-        // --- SỬA LẠI ĐOẠN NÀY ---
-        // Logic cũ (SAI): newFill.setOpacity(fill.getOpacity()); 
-        // -> Vì fill mặc định opacity=0, nên lệnh này làm màu mới biến mất luôn.
-
-        // Logic mới (ĐÚNG): Chỉ giữ opacity cũ nếu nó đã được set (lớn hơn 0)
-        // Ví dụ: fill-opacity="0.5" khai báo trước, thì giữ 0.5.
-        // Còn nếu chưa khai báo gì (đang là 0), thì lấy opacity gốc của màu mới (thường là 1 - hiện rõ).
-        if (fill.getOpacity() > 0) {
-            newFill.setOpacity(fill.getOpacity());
+        if (value == "none") {
+            fill = color(0, 0, 0, 0); // Trong suốt
         }
-        // ------------------------
-
-        fill = newFill;
+        else {
+            color newFill = apply(value);
+            // Giữ lại opacity cũ nếu đã có (vì fill="..." chỉ set màu)
+            if (fill.getOpacity() > 0 && newFill.getOpacity() == 1.0f) {
+                newFill.setOpacity(fill.getOpacity());
+            }
+            fill = newFill;
+        }
+        isFillSet = true;
     }
-
     else if (name == "stroke") {
-        color newStrokeColor = apply(value);
-
-        // --- SỬA LẠI ĐOẠN NÀY ---
-        // Tương tự như fill
-        if (stroke.getStrokeColor().getOpacity() > 0) {
-            newStrokeColor.setOpacity(stroke.getStrokeColor().getOpacity());
+        if (value == "none") {
+            // Trường hợp stroke="none"
+            color transparent(0, 0, 0, 0.0f);
+            stroke.setStrokeColor(transparent);
+            // Không set stroke width = 1 ở đây
         }
-        // ------------------------
+        else {
+            // Trường hợp có màu
+            color newStrokeColor = apply(value);
 
-        stroke.setStrokeColor(newStrokeColor);
+            // Giữ opacity cũ nếu đã set riêng (stroke-opacity)
+            if (isStrokeOpacitySet) {
+                newStrokeColor.setOpacity(stroke.getStrokeColor().getOpacity());
+            }
+
+            stroke.setStrokeColor(newStrokeColor);
+
+            // QUAN TRỌNG: Chỉ set width mặc định = 1 nếu nó chưa được set và màu KHÔNG phải none
+            if (stroke.getStrokeWidth() == 0 && !isStrokeWidthSet) {
+                stroke.setStrokeWidth(1.0f);
+            }
+        }
+        isStrokeSet = true;
     }
     else if (name == "stroke-width") {
         try {
             stroke.setStrokeWidth(stof(value));
+            isStrokeWidthSet = true;
         }
-        catch (const std::invalid_argument&) {}
+        catch (...) {}
     }
-
     else if (name == "stroke-opacity") {
         try {
             float opacity = stof(value);
-            color currentCol = stroke.getStrokeColor();
-            currentCol.setOpacity(opacity);
-            stroke.setStrokeColor(currentCol);
+            color c = stroke.getStrokeColor();
+            c.setOpacity(opacity);
+            stroke.setStrokeColor(c);
+            isStrokeOpacitySet = true;
         }
-        catch (const std::invalid_argument&) {}
+        catch (...) {}
     }
-
     else if (name == "fill-opacity") {
         try {
             float opacity = stof(value);
-            color currentCol = fill;
-            currentCol.setOpacity(opacity);
-            fill = currentCol;
+            color c = fill;
+            c.setOpacity(opacity);
+            fill = c;
+            isFillOpacitySet = true;
         }
-        catch (const std::invalid_argument&) {}
+        catch (...) {}
     }
     else if (name == "transform") {
-        transform.parseTransform(value);
+        this->transform.parse(value);
     }
 }
-const color& Element::getFill() const {
-    return fill;
-}
 
-void Element::setFill(const color& f) {
-    this->fill = f;
-}
+// Logic kế thừa quan trọng
+void Element::inheritFrom(Element* parent) {
+    if (!parent) return;
 
-const Stroke& Element::getStroke() const {
-    return stroke;
-}
+    if (!isFillSet && parent->isFillSet) {
+        this->fill = parent->fill;
+        // Nếu con chưa set opacity, lấy luôn opacity của cha nằm trong biến fill
+        if (!isFillOpacitySet) {
+            // fill của cha đã chứa opacity rồi
+        }
+        isFillSet = true;
+    }
+    // Nếu con có set fill nhưng chưa set opacity, và cha có set opacity
+    if (isFillSet && !isFillOpacitySet && parent->isFillOpacitySet) {
+        this->fill.setOpacity(this->fill.getOpacity() * parent->fill.getOpacity());
+    }
 
-void Element::setStroke(const Stroke& s) {
-    this->stroke = s;
+    if (!isStrokeSet && parent->isStrokeSet) {
+        this->stroke.setStrokeColor(parent->stroke.getStrokeColor());
+        isStrokeSet = true;
+    }
+
+    if (!isStrokeWidthSet && parent->isStrokeWidthSet) {
+        this->stroke.setStrokeWidth(parent->stroke.getStrokeWidth());
+        isStrokeWidthSet = true;
+    }
+
+    // Kế thừa opacity cho stroke
+    if (isStrokeSet && !isStrokeOpacitySet && parent->isStrokeOpacitySet) {
+        color c = this->stroke.getStrokeColor();
+        c.setOpacity(c.getOpacity() * parent->stroke.getStrokeColor().getOpacity());
+        this->stroke.setStrokeColor(c);
+    }
 }
