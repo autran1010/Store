@@ -4,7 +4,7 @@
 #ifndef TEXT_H_
 #define TEXT_H_
 
-class Text: public Element {
+class Text : public Element {
 private:
 	point position;
 	string content;
@@ -16,7 +16,7 @@ private:
 	string fontStyle;
 	string fontWeight;
 public:
-	
+
 	Text() : position(0, 0), content(""), fontsize(16), font("Times New Roman"), dx(0), dy(0), textAnchor("start"), fontStyle("normal"), fontWeight("normal") {}
 	~Text() override = default;
 

@@ -15,23 +15,16 @@ void Line::parseAttributes(xml_node<>* node) {
     }
 }
 void Line::Draw(Gdiplus::Graphics* graphics) {
-    // 1. Lưu trạng thái Graphics hiện tại
+
     GraphicsState state = graphics->Save();
 
-    // 2. Lấy ma trận từ class Transform và áp dụng
     graphics->MultiplyTransform(this->transform.getMatrix(), MatrixOrderPrepend);
 
-    Gdiplus::Color strokeColor(
-        (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getR() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getG() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getB() * 255.0f));
+    Gdiplus::Pen* pen = this->createPenFromStroke();
 
-    Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
-
-    if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawLine(&pen, point1.getX(), point1.getY(), point2.getX(), point2.getY());
+    if (pen != nullptr) {
+        graphics->DrawLine(pen, point1.getX(), point1.getY(), point2.getX(), point2.getY());
+        delete pen;
     }
-
     graphics->Restore(state);
 }

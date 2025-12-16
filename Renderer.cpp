@@ -5,7 +5,7 @@
 using namespace Gdiplus;
 
 Renderer::Renderer() {
-   
+
 }
 
 Renderer::~Renderer() {
@@ -69,7 +69,7 @@ void Renderer::renAll(HDC hdc) {
 
     matrix.Scale(pw / vw, ph / vh);
 
-  
+
     matrix.Translate(-vx, -vy);
 
     graphics.SetTransform(&matrix);

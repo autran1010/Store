@@ -17,13 +17,11 @@ void polygon::parseAttributes(xml_node<>* node) {
         }
     }
 }
+
 void polygon::Draw(Gdiplus::Graphics* graphics) {
     if (points.size() < 3) return;
-
-    // 1. Lưu trạng thái Graphics hiện tại
     GraphicsState state = graphics->Save();
 
-    // 2. Lấy ma trận từ class Transform và áp dụng
     graphics->MultiplyTransform(this->transform.getMatrix(), MatrixOrderPrepend);
 
     Gdiplus::Color fillColor(
@@ -32,26 +30,25 @@ void polygon::Draw(Gdiplus::Graphics* graphics) {
         (BYTE)(this->fill.getG() * 255.0f),
         (BYTE)(this->fill.getB() * 255.0f));
 
-    Gdiplus::Color strokeColor(
-        (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getR() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getG() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getB() * 255.0f));
 
     Gdiplus::SolidBrush brush(fillColor);
-    Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
-    // Convert points
     vector<Gdiplus::PointF> gdiPoints(points.size());
+
+
     for (size_t i = 0; i < points.size(); ++i) {
         gdiPoints[i] = Gdiplus::PointF(points[i].getX(), points[i].getY());
     }
 
+    Gdiplus::FillMode mode = (this->fillRule == "evenodd") ? Gdiplus::FillModeAlternate : Gdiplus::FillModeWinding;
     if (this->fill.getOpacity() > 0) {
-        graphics->FillPolygon(&brush, gdiPoints.data(), (INT)points.size());
+        graphics->FillPolygon(&brush, gdiPoints.data(), (INT)points.size(), mode);
     }
-    if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawPolygon(&pen, gdiPoints.data(), (INT)points.size());
+    Gdiplus::Pen* pen = this->createPenFromStroke();
+
+    if (pen != nullptr) {
+        graphics->DrawPolygon(pen, gdiPoints.data(), (INT)gdiPoints.size());
+        delete pen;
     }
 
     graphics->Restore(state);

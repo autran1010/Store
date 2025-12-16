@@ -17,11 +17,11 @@ void rectangle::parseAttributes(xml_node<>* node) {
         }
     }
 }
+
 void rectangle::Draw(Gdiplus::Graphics* graphics) {
-    // 1. Lưu trạng thái Graphics hiện tại
     GraphicsState state = graphics->Save();
 
-    // 2. Lấy ma trận từ class Transform và áp dụng
+
     graphics->MultiplyTransform(this->transform.getMatrix(), MatrixOrderPrepend);
 
     Gdiplus::Color fillColor(
@@ -31,22 +31,18 @@ void rectangle::Draw(Gdiplus::Graphics* graphics) {
         (BYTE)(this->fill.getB() * 255)
     );
 
-    Gdiplus::Color strokeColor(
-        (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255),
-        (BYTE)(this->stroke.getStrokeColor().getR() * 255),
-        (BYTE)(this->stroke.getStrokeColor().getG() * 255),
-        (BYTE)(this->stroke.getStrokeColor().getB() * 255)
-    );
 
     Gdiplus::SolidBrush brush(fillColor);
-    Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
     if (this->fill.getOpacity() > 0) {
         graphics->FillRectangle(&brush, points.getX(), points.getY(), width, height);
     }
 
-    if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawRectangle(&pen, points.getX(), points.getY(), width, height);
+    Gdiplus::Pen* pen = this->createPenFromStroke();
+
+    if (pen != nullptr) {
+        graphics->DrawRectangle(pen, points.getX(), points.getY(), width, height);
+        delete pen;
     }
 
     graphics->Restore(state);

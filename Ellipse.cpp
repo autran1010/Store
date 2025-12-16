@@ -28,14 +28,9 @@ void ellipse::Draw(Gdiplus::Graphics* graphics) {
         (BYTE)(this->fill.getG() * 255.0f),
         (BYTE)(this->fill.getB() * 255.0f));
 
-    Gdiplus::Color strokeColor(
-        (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getR() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getG() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getB() * 255.0f));
+
 
     Gdiplus::SolidBrush brush(fillColor);
-    Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
     float x = center.getX() - rx;
     float y = center.getY() - ry;
@@ -45,9 +40,11 @@ void ellipse::Draw(Gdiplus::Graphics* graphics) {
     if (this->fill.getOpacity() > 0) {
         graphics->FillEllipse(&brush, x, y, w, h);
     }
-    if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawEllipse(&pen, x, y, w, h);
-    }
+    Gdiplus::Pen* pen = this->createPenFromStroke();
 
+    if (pen != nullptr) {
+        graphics->DrawEllipse(pen, x, y, w, h);
+        delete pen;
+    }
     graphics->Restore(state);
 }

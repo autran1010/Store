@@ -8,7 +8,10 @@
 
 class Path : public Element {
 private:
-    std::string d_attr; // Lưu chuỗi lệnh vẽ
+    std::string d_attr;
+    string strokeLineJoin;
+    string strokeLineCap;
+    string fillRule;
 public:
     Path() = default;
     ~Path() override = default;

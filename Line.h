@@ -1,4 +1,3 @@
-
 #include "Point.h"
 #include "Element.h"
 #ifndef LINE_H_

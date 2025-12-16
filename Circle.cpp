@@ -16,12 +16,18 @@ void Circle::parseAttributes(xml_node<>* node) {
         }
     }
 }
+
 void Circle::Draw(Gdiplus::Graphics* graphics) {
-    // 1. Lưu trạng thái Graphics hiện tại
+
     GraphicsState state = graphics->Save();
 
-    // 2. Lấy ma trận từ class Transform và áp dụng
+
     graphics->MultiplyTransform(this->transform.getMatrix(), MatrixOrderPrepend);
+
+    float x = center.getX() - radius;
+    float y = center.getY() - radius;
+    float w = 2.0f * radius;
+    float h = 2.0f * radius;
 
     Gdiplus::Color fillColor(
         (BYTE)(this->fill.getOpacity() * 255.0f),
@@ -29,27 +35,20 @@ void Circle::Draw(Gdiplus::Graphics* graphics) {
         (BYTE)(this->fill.getG() * 255.0f),
         (BYTE)(this->fill.getB() * 255.0f));
 
-    Gdiplus::Color strokeColor(
-        (BYTE)(this->stroke.getStrokeColor().getOpacity() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getR() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getG() * 255.0f),
-        (BYTE)(this->stroke.getStrokeColor().getB() * 255.0f));
 
     Gdiplus::SolidBrush brush(fillColor);
-    Gdiplus::Pen pen(strokeColor, this->stroke.getStrokeWidth());
 
-    float x = center.getX() - radius;
-    float y = center.getY() - radius;
-    float w = 2.0f * radius;
-    float h = 2.0f * radius;
+
 
     if (this->fill.getOpacity() > 0) {
         graphics->FillEllipse(&brush, x, y, w, h);
     }
-    if (this->stroke.getStrokeWidth() > 0 && this->stroke.getStrokeColor().getOpacity() > 0) {
-        graphics->DrawEllipse(&pen, x, y, w, h);
-    }
+    Gdiplus::Pen* pen = this->createPenFromStroke();
 
+    if (pen != nullptr) {
+        graphics->DrawEllipse(pen, x, y, w, h);
+        delete pen;
+    }
 
     // 2. Khôi phục trạng thái
     graphics->Restore(state);

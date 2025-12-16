@@ -12,7 +12,7 @@ protected:
     color fill;
     Transform transform;
 
-    // Các cờ đánh dấu xem thuộc tính này có được set trực tiếp từ XML không
+
     bool isFillSet = false;
     bool isStrokeSet = false;
     bool isStrokeWidthSet = false;
@@ -20,27 +20,27 @@ protected:
     bool isStrokeOpacitySet = false;
 
     color apply(string value);
-
+    //"Mới thêm"
+    string fillRule = "nonzero";
+    bool isFillRuleSet = false;
+    Gdiplus::Pen* createPenFromStroke(); //Hàm mới thêm dùng để pen
 public:
     Element() {
-        // Mặc định stroke width = 0 (không vẽ)
         stroke.setStrokeWidth(0.0f);
     }
-    virtual ~Element() = default;
-
-    void parse(string, string);
-    virtual void parseAttributes(xml_node<>*) = 0;
-    virtual void Draw(Gdiplus::Graphics* graphics) = 0;
-
-    // --- HÀM MỚI: Kế thừa thuộc tính từ cha ---
-    // Nếu con chưa set thuộc tính nào thì lấy thuộc tính đó từ cha
-    void inheritFrom(Element* parent);
 
     Transform& getTransform() { return transform; }
     Stroke& getStroke() { return stroke; }
-    void setStroke(const Stroke& s) { stroke = s; }
     color& getFill() { return fill; }
+    string getFillRule(const string& c) { return fillRule; }
+    void setStroke(const Stroke& s) { stroke = s; }
     void setFill(const color& f) { fill = f; }
+
+    virtual ~Element() = default;
+    void parse(string, string);
+    virtual void parseAttributes(xml_node<>*) = 0;
+    virtual void Draw(Gdiplus::Graphics* graphics) = 0;
+    void inheritFrom(Element* parent);
 };
 
 #endif
